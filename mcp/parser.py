@@ -351,6 +351,7 @@ class LawLibrary:
         result = law.get_paragraph(paragraph_id, absatz_id)
         result["law"] = law.short_title
         result["law_title"] = law.full_title
+        result["url"] = f'https://www.gesetze-im-internet.de/{law.short_title.lower()}/__{paragraph_id}.html'
         
         return result
         
