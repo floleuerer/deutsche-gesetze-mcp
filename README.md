@@ -2,7 +2,7 @@
 
 Dieser Server implementiert das [Model Context Protocol (MCP)](https://modelcontextprotocol.io), um deutschen Gesetzestexte für LLMs (Large Language Models) bereitzustellen. Er ermöglicht es KI-Assistenten, gezielt nach Gesetzen zu suchen und spezifische Paragraphen abzurufen.
 
-Die Gesetzestexte werden aus Markdown-Dateien geparst, die dem Format des [Bundestag/gesetze](https://github.com/bundestag/gesetze) Repositories entsprechen.
+Die Gesetzestexte werden aus Markdown-Dateien geparst, die dem Format des [Bundestag/gesetze](https://github.com/bundestag/gesetze) Repositories entsprechen (Hinweis: Dieses Repository ist veraltet und dient nur zu Demozwecken).
 
 ## Funktionen
 
@@ -29,7 +29,7 @@ Die Gesetzestexte werden aus Markdown-Dateien geparst, die dem Format des [Bunde
 
 ### Docker (Empfohlen)
 
-Die Docker-Version klont automatisch das gesamte [Bundestag/gesetze](https://github.com/bundestag/gesetze) Repository in das Image, sodass alle Gesetze sofort lokal verfügbar sind.
+Die Docker-Version klont automatisch das gesamte [Bundestag/gesetze](https://github.com/bundestag/gesetze) Repository (veraltet, nur Demo) in das Image, sodass alle Gesetze sofort lokal verfügbar sind.
 
 1.  **Image bauen:**
     ```bash
@@ -40,6 +40,17 @@ Die Docker-Version klont automatisch das gesamte [Bundestag/gesetze](https://git
     ```bash
     docker run -p 8001:8001 deutsche-gesetze-mcp
     ```
+
+## Datenvorbereitung
+
+Das Projekt enthält im Ordner `prepare_data` Skripte, um aktuelle Gesetzestexte direkt von [www.gesetze-im-internet.de](https://www.gesetze-im-internet.de) herunterzuladen und für den Server aufzubereiten.
+
+1.  **Skript ausführen:**
+    ```bash
+    cd prepare_data
+    ./prepare_gesetze_im_internet.sh
+    ```
+    Dies lädt die Gesetze herunter, entpackt sie und konvertiert sie in das benötigte Format.
 
 ## Konfiguration
 
@@ -110,7 +121,7 @@ Ein Beispiel für die Integration in einen KI-Agenten findest du im Ordner [goog
 
 ## Datenformat
 
-Der Parser erwartet Markdown-Dateien, wie sie im Projekt [bundestag/gesetze](https://github.com/bundestag/gesetze) verwendet werden. Die Struktur sieht typischerweise so aus:
+Der Parser erwartet Markdown-Dateien, wie sie im Projekt [bundestag/gesetze](https://github.com/bundestag/gesetze) (veraltet, nur Demo) verwendet werden. Die Struktur sieht typischerweise so aus:
 
 ```markdown
 ---
