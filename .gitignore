@@ -1,6 +1,7 @@
 .python-version
 _test/
 .DS_Store
+.adk
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
