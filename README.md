@@ -7,6 +7,7 @@ Die Gesetzestexte werden aus Markdown-Dateien geparst, die dem Format des [Bunde
 ## Funktionen
 
 *   **Gesetze auflisten & suchen**: Durchsuchen der verfügbaren Gesetze (z.B. BGB, StGB, HGB).
+*   **Volltextsuche**: Suche nach Begriffen in den Gesetzestexten.
 *   **Paragraphen abrufen**: Abruf des Volltextes spezifischer Paragraphen (inkl. Absätze).
 *   **Flexible Datenquellen**: Laden der Gesetze aus einem lokalen Ordner oder direkt von GitHub.
 
@@ -72,6 +73,14 @@ Der Server kann direkt über Python gestartet werden. Er nutzt `FastMCP` und ste
 python mcp/server.py
 ```
 
+### Tests
+
+Die Tests können mit `pytest` ausgeführt werden. Um die Tests zu starten, muss der `mcp` Ordner im Python-Pfad liegen:
+
+```bash
+PYTHONPATH=mcp python3 -m pytest mcp/tests
+```
+
 ### Verfügbare Tools
 
 Der Server stellt folgende MCP-Tools zur Verfügung:
@@ -86,6 +95,12 @@ Der Server stellt folgende MCP-Tools zur Verfügung:
     *   Parameter `law`: Das Kürzel des Gesetzes (z.B. "BGB").
     *   Parameter `paragraph`: Die Nummer des Paragraphen (z.B. "1", "14a").
     *   Gibt den Text des Paragraphen (und ggf. spezifische Absätze) zurück.
+
+3.  **`search_laws(query: str, laws: list[str] | None)`**
+    *   Volltextsuche über alle oder ausgewählte Gesetze.
+    *   Parameter `query`: Der Suchbegriff (z.B. "Schadensersatz", "Kündigung").
+    *   Parameter `laws`: (Optional) Liste von Gesetzeskürzeln zur Einschränkung der Suche (z.B. `["BGB", "HGB"]`).
+    *   Gibt eine Liste von Treffern mit Paragraphen und Textausschnitten zurück.
 
 ### Verwendung mit MCP-Clients
 
