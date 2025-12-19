@@ -1,5 +1,6 @@
 import re
 import json
+import sqlite3
 from typing import List, Optional, Dict, Any, Union
 import urllib.request
 from pathlib import Path
@@ -203,7 +204,16 @@ class LawLibrary:
     
     def __init__(self):
         self.laws: Dict[str, LawParser] = {}
-        
+        # Initialize in-memory SQLite for FTS
+        self.conn = sqlite3.connect(':memory:', check_same_thread=False)
+        self.conn.execute("""
+            CREATE VIRTUAL TABLE laws_fts USING fts5(
+                law_code UNINDEXED, 
+                paragraph_id UNINDEXED, 
+                paragraph_name, 
+                content
+            )
+        """)
 
     def load_laws_from_folder(self, folder_path: Path):
         laws = list(Path(folder_path).glob('**/index.md'))
@@ -213,7 +223,6 @@ class LawLibrary:
             if loaded:
                 print(f'{loaded} - {len(self.laws[loaded.lower()].paragraphs)}')
             
-        print(self.laws.keys())
 
     def _load_law_from_markdown(self, md_text: str) -> str:
         parser = LawParser(md_text)
@@ -225,6 +234,16 @@ class LawLibrary:
             raise ValueError(f"Could not determine short title")
             
         self.laws[parser.short_title.lower()] = parser
+        
+        # Index for search
+        for p_id, node in parser.paragraphs.items():
+            text_content = "\n".join(node.content_lines)
+            self.conn.execute(
+                "INSERT INTO laws_fts (law_code, paragraph_id, paragraph_name, content) VALUES (?, ?, ?, ?)",
+                (parser.short_title.lower(), p_id, node.name or "", text_content)
+            )
+        self.conn.commit()
+
         return parser.short_title
 
     def load_law_from_file(self, file_path: Path) -> str:
@@ -339,8 +358,6 @@ class LawLibrary:
         Returns:
             Dict containing law, paragraph info and text content
         """
-        # Normalize the law code (uppercase) for consistency
-        #law_code = law_code.upper()
         
         law_code_lower = law_code.lower()
         if law_code_lower not in self.laws:
@@ -377,6 +394,35 @@ class LawLibrary:
             JSON string representation of available laws
         """
         return json.dumps(self.get_available_laws(search_string=search_string), ensure_ascii=False, indent=2)
+
+    def search(self, query: str, law_codes: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """
+        Fulltext search over laws.
+        """
+        sql = "SELECT law_code, paragraph_id, paragraph_name, snippet(laws_fts, 3, '<b>', '</b>', '...', 64) as preview FROM laws_fts WHERE laws_fts MATCH ? ORDER BY rank LIMIT 20"
+        
+        try:
+            cursor = self.conn.execute(sql, (query,))
+            results = []
+            
+            for row in cursor:
+                code = row[0]
+                # Filter by law code if requested
+                if law_codes and code.lower() not in [l.lower() for l in law_codes]:
+                    continue
+                    
+                results.append({
+                    "law": code,
+                    "paragraph": row[1],
+                    "title": row[2],
+                    "match": row[3],
+                    "url": f'https://www.gesetze-im-internet.de/{code.lower()}/__{row[1]}.html'
+                })
+            return results
+        except sqlite3.OperationalError as e:
+            # Handle FTS syntax errors gracefully
+            print(f"Search error: {e}")
+            return []
 
 # Example usage
 if __name__ == "__main__":

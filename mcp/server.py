@@ -40,7 +40,27 @@ def get_paragraph(law: str, paragraph: str) -> str:
     text = library.get_json(law, paragraph)
     return text
 
-print(mcp.__dict__)
+@mcp.tool()
+def search_laws(query: str, laws: list[str] | None = None) -> str:
+    """Fulltext search over all laws or a specific list of laws.
+    
+    Args:
+        query: The search query (e.g. "Schadensersatz", "Kündigung").
+        laws: Optional list of law codes to filter by (e.g. ["BGB", "HGB"]).
+    """
+    normalized_laws = None
+    if laws:
+        normalized_laws = []
+        for law in laws:
+            law_lower = law.strip().lower()
+            if law_lower not in library.laws:
+                available = library.get_available_laws_json(law)
+                return f"Law '{law}' not available. Available laws: {available}"
+            normalized_laws.append(law_lower)
+            
+    results = library.search(query, normalized_laws)
+    return json.dumps(results, ensure_ascii=False, indent=2)
+
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
