@@ -1,10 +1,9 @@
-# server.py
 from mcp.server.fastmcp import FastMCP
 from parser import LawLibrary
 import json
 from config import settings
-# Create an MCP server
-mcp = FastMCP("Demo", stateless_http=True, host='0.0.0.0', port=8001, debug=True)
+
+mcp = FastMCP("deutsche-gesetze-mcp", stateless_http=True, host='0.0.0.0', port=8001, debug=True)
 
 LAWS = []
 
@@ -45,4 +44,3 @@ print(mcp.__dict__)
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
-    #mcp.run(transport="sse")
